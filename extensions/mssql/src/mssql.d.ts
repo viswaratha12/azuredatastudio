@@ -340,6 +340,7 @@ export interface IDacFxService {
 	generateDeployPlan(packageFilePath: string, databaseName: string, ownerUri: string, taskExecutionMode: azdata.TaskExecutionMode): Thenable<GenerateDeployPlanResult>;
 	getOptionsFromProfile(profilePath: string): Thenable<DacFxOptionsResult>;
 	validateStreamingJob(packageFilePath: string, createStreamingJobTsql: string): Thenable<ValidateStreamingJobResult>;
+	getDefaultPublishOptions(): Thenable<DacFxOptionsResult>;
 }
 
 export interface DacFxResult extends azdata.ResultStatus {
@@ -356,6 +357,10 @@ export interface DacFxOptionsResult extends azdata.ResultStatus {
 
 export interface ValidateStreamingJobResult extends azdata.ResultStatus {
 }
+
+// export interface GetDefaultPublishOptionsResult extends azdata. {
+
+// }
 
 export interface ExportParams {
 	databaseName: string;

@@ -130,4 +130,15 @@ export class DacFxService implements mssql.IDacFxService {
 			}
 		);
 	}
+
+	public getDefaultPublishOptions(): Thenable<mssql.DacFxOptionsResult> {
+		const params: contracts.GetDefaultPublishOptionsParams = {};
+		return this.client.sendRequest(contracts.GetDefaultPublishOptionsRequest.type, params).then(
+			undefined,
+			e => {
+				this.client.logFailedRequest(contracts.GetDefaultPublishOptionsRequest.type, e);
+				return Promise.resolve(undefined);
+			}
+		);
+	}
 }

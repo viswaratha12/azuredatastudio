@@ -482,6 +482,10 @@ export interface ValidateStreamingJobParams {
 	createStreamingJobTsql: string
 }
 
+export interface GetDefaultPublishOptionsParams {
+
+}
+
 export namespace ExportRequest {
 	export const type = new RequestType<ExportParams, mssql.DacFxResult, void, void>('dacfx/export');
 }
@@ -512,6 +516,10 @@ export namespace GetOptionsFromProfileRequest {
 
 export namespace ValidateStreamingJobRequest {
 	export const type = new RequestType<ValidateStreamingJobParams, mssql.ValidateStreamingJobResult, void, void>('dacfx/validateStreamingJob');
+}
+
+export namespace GetDefaultPublishOptionsRequest {
+	export const type = new RequestType<GetDefaultPublishOptionsParams, mssql.DacFxOptionsResult, void, void>('dacfx/getDefaultPublishOptions');
 }
 
 // ------------------------------- </ DacFx > ------------------------------------

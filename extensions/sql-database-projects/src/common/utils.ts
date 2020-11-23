@@ -245,11 +245,11 @@ export function getDataWorkspaceExtensionApi(): dataworkspace.IExtension {
 }
 
 /*
- * Returns the default deployment options from DacFx
+ * Returns the default publish options from DacFx
  */
-export async function GetDefaultDeploymentOptions(): Promise<mssql.DeploymentOptions> {
-	const service = (vscode.extensions.getExtension(mssql.extension.name)!.exports as mssql.IExtension).schemaCompare;
-	const result = await service.schemaCompareGetDefaultOptions();
+export async function GetDefaultPublishOptions(): Promise<mssql.DeploymentOptions> {
+	const service = (vscode.extensions.getExtension(mssql.extension.name)!.exports as mssql.IExtension).dacFx;
+	const result = await service.getDefaultPublishOptions();
 
-	return result.defaultDeploymentOptions;
+	return result.deploymentOptions;
 }

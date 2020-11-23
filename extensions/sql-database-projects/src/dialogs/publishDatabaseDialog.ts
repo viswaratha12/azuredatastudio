@@ -216,7 +216,7 @@ export class PublishDatabaseDialog {
 		// eventually, database options will be configurable in this dialog
 		// but for now, just send the default DacFx deployment options if no options were loaded from a publish profile
 		if (!this.deploymentOptions) {
-			this.deploymentOptions = await utils.GetDefaultDeploymentOptions();
+			this.deploymentOptions = await utils.GetDefaultPublishOptions();
 
 			// re-include database-scoped credentials
 			this.deploymentOptions.excludeObjectTypes = this.deploymentOptions.excludeObjectTypes.filter(x => x !== SchemaObjectType.DatabaseScopedCredentials);
