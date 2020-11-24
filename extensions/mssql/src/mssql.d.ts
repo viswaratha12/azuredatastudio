@@ -358,10 +358,6 @@ export interface DacFxOptionsResult extends azdata.ResultStatus {
 export interface ValidateStreamingJobResult extends azdata.ResultStatus {
 }
 
-// export interface GetDefaultPublishOptionsResult extends azdata. {
-
-// }
-
 export interface ExportParams {
 	databaseName: string;
 	packageFilePath: string;

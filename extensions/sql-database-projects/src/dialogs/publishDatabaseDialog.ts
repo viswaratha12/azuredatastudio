@@ -218,9 +218,6 @@ export class PublishDatabaseDialog {
 		if (!this.deploymentOptions) {
 			this.deploymentOptions = await utils.GetDefaultPublishOptions();
 
-			// re-include database-scoped credentials
-			this.deploymentOptions.excludeObjectTypes = this.deploymentOptions.excludeObjectTypes.filter(x => x !== SchemaObjectType.DatabaseScopedCredentials);
-
 			// this option needs to be true for same database references validation to work
 			if (this.project.databaseReferences.length > 0) {
 				this.deploymentOptions.includeCompositeObjects = true;
