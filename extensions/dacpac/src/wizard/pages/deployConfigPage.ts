@@ -10,6 +10,7 @@ import { DacFxDataModel } from '../api/models';
 import { DataTierApplicationWizard, DeployOperationPath, Operation, DeployNewOperationPath, PageName } from '../dataTierApplicationWizard';
 import { DacFxConfigPage } from '../api/dacFxConfigPage';
 import { generateDatabaseName } from '../api/utils';
+import { TelemetryReporter, TelemetryViews } from '../../telemetry';
 
 export class DeployConfigPage extends DacFxConfigPage {
 	private databaseDropdownComponent: azdata.FormComponent;
@@ -47,6 +48,9 @@ export class DeployConfigPage extends DacFxConfigPage {
 
 		this.form = this.formBuilder.component();
 		await this.view.initializeModel(this.form);
+
+		//Reporting DeployDacpac selection event to the telemetry report //TODO: can add additional properties of database and file details, Also add Operation unique ID at all places if possible
+		TelemetryReporter.sendActionEvent(TelemetryViews.DeployConfigPage, 'DataTierApplicationDeployDacpacSelected');
 		return true;
 	}
 

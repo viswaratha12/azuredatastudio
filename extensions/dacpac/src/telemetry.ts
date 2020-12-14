@@ -14,5 +14,11 @@ let packageInfo = Utils.getPackageInfo(packageJson);
 export const TelemetryReporter = new AdsTelemetryReporter(packageInfo.name, packageInfo.version, packageInfo.aiKey);
 
 export enum TelemetryViews {
-	SelectOperationPage = 'SelectOperationPage'
+	SelectOperationPage = 'SelectOperationPage',
+	DataTierApplicationWizard = 'DataTierApplicationWizard',
+	DeployConfigPage = 'DeployConfigPage',
+	DeployPlanPage = 'DeployPlanPage',
+	ExportConfigPage = 'ExportConfigPage',
+	ExtractConfigPage = 'ExtractConfigPage',
+	ImportConfigPage = 'ImportConfigPage'
 }

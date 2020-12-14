@@ -15,6 +15,7 @@ import { ExtractConfigPage } from './pages/extractConfigPage';
 import { ImportConfigPage } from './pages/importConfigPage';
 import { DacFxDataModel } from './api/models';
 import { BasePage } from './api/basePage';
+import { TelemetryReporter, TelemetryViews } from '../telemetry';
 import * as mssql from '../../../mssql';
 
 const msSqlProvider = 'MSSQL';
@@ -110,6 +111,8 @@ export class DataTierApplicationWizard {
 			}
 			// don't open the wizard if connection dialog is cancelled
 			if (!this.connection) {
+				//Reporting Dacpac wizard cancelled event to Telemetry
+				TelemetryReporter.sendActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationWizardCancelled');
 				return false;
 			}
 		}
@@ -119,6 +122,8 @@ export class DataTierApplicationWizard {
 		this.configureButtons();
 
 		this.wizard.open();
+		//Reporting Dacpac wizard successful event to Telemetry
+		TelemetryReporter.sendActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationWizardOpened');
 		return true;
 	}
 
@@ -262,6 +267,14 @@ export class DataTierApplicationWizard {
 		const service = await this.getService(msSqlProvider);
 		const ownerUri = await azdata.connection.getUriForConnection(this.model.server.connectionId);
 
+		//Deploy Dacpac: 'Deploy button' clicked in deploy summary page, Reporting the event selection to the telemetry
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationDeployDacpacClicked')
+			.withAdditionalProperties({
+				'targetServer': this.model.server.toString(),
+				'targetDatabaseName': this.model.database,
+				'dacpacFileLocation': this.model.filePath,
+				'targetDatabaseStatus': this.model.upgradeExisting ? 'Upgrade Existing Databse' : 'New Database'
+			}).send();
 		return await service.deployDacpac(this.model.filePath, this.model.database, this.model.upgradeExisting, ownerUri, azdata.TaskExecutionMode.execute);
 	}
 
@@ -269,6 +282,14 @@ export class DataTierApplicationWizard {
 		const service = await this.getService(msSqlProvider);
 		const ownerUri = await azdata.connection.getUriForConnection(this.model.server.connectionId);
 
+		//Extract Dacpac: 'Extract button' clicked in extract summary page, Reporting the event selection to the telemetry
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationExtractDacpacClicked')
+			.withAdditionalProperties({
+				'sourceServer': this.model.server.toString(),
+				'sourcerDatabaseName': this.model.database,
+				'dacpacFileLocation': this.model.filePath,
+				'version': this.model.version
+			}).send();
 		return await service.extractDacpac(this.model.database, this.model.filePath, this.model.database, this.model.version, ownerUri, azdata.TaskExecutionMode.execute);
 	}
 
@@ -276,6 +297,13 @@ export class DataTierApplicationWizard {
 		const service = await this.getService(msSqlProvider);
 		const ownerUri = await azdata.connection.getUriForConnection(this.model.server.connectionId);
 
+		//Export Bacpac: 'Export button' clicked in Export summary page, Reporting the event selection to the telemetry
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationExportBacpacClicked')
+			.withAdditionalProperties({
+				'sourceServer': this.model.server.toString(),
+				'sourcerDatabaseName': this.model.database,
+				'bacpacFileLocation': this.model.filePath
+			}).send();
 		return await service.exportBacpac(this.model.database, this.model.filePath, ownerUri, azdata.TaskExecutionMode.execute);
 	}
 
@@ -283,6 +311,13 @@ export class DataTierApplicationWizard {
 		const service = await this.getService(msSqlProvider);
 		const ownerUri = await azdata.connection.getUriForConnection(this.model.server.connectionId);
 
+		//Import Bacpac: 'Import button' clicked in Import summary page, Reporting the event selection to the telemetry
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationImportBacpacClicked')
+			.withAdditionalProperties({
+				'targetServer': this.model.server.toString(),
+				'targetDatabaseName': this.model.database,
+				'bacpacFileLocation': this.model.filePath
+			}).send();
 		return await service.importBacpac(this.model.filePath, this.model.database, ownerUri, azdata.TaskExecutionMode.execute);
 	}
 
@@ -295,6 +330,14 @@ export class DataTierApplicationWizard {
 			description: ''
 		};
 
+		//Deploy Dacpac 'generate script' button clicked in DeployPlanPage, Reporting the event selection to the telemetry
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationGenerateDeployScriptClicked')
+			.withAdditionalProperties({
+				'targetServer': this.model.server.toString(),
+				'targetDatabaseName': this.model.database,
+				'dacpacFileLocation': this.model.filePath,
+				'targetDatabaseStatus': this.model.upgradeExisting ? 'Upgrade Existing Databse' : 'New Database'
+			}).send();
 		return await service.generateDeployScript(this.model.filePath, this.model.database, ownerUri, azdata.TaskExecutionMode.script);
 	}
 
@@ -340,13 +383,31 @@ export class DataTierApplicationWizard {
 	public async generateDeployPlan(): Promise<string> {
 		const service = await this.getService(msSqlProvider);
 		const ownerUri = await azdata.connection.getUriForConnection(this.model.server.connectionId);
-
 		const result = await service.generateDeployPlan(this.model.filePath, this.model.database, ownerUri, azdata.TaskExecutionMode.execute);
+		//Generate deploy plan started event
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationGenerateDeployPlanStarted')
+			.withAdditionalProperties({
+				'targetServer': this.model.server.toString(),
+				'targetDatabaseName': this.model.database,
+				'dacpacFileLocation': this.model.filePath,
+				'targetDatabaseStatus': this.model.upgradeExisting ? 'Upgrade Existing Databse' : 'New Database',
+				'startedTime': Date.now().toString()
+			}).send();
 
 		if (!result || !result.success) {
 			vscode.window.showErrorMessage(loc.deployPlanErrorMessage(result.errorMessage));
+			//Generate deploy plan resulted error
+			TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationGenerateDeployPlanErrored')
+				.withAdditionalProperties({
+					'erroredTime': Date.now.toString()
+				}).send();
 		}
 
+		//Generate deploy plan resulted succes
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationGenerateDeployPlanSucceed')
+			.withAdditionalProperties({
+				'endTime': Date.now.toString()
+			}).send();
 		return result.report;
 	}
 
