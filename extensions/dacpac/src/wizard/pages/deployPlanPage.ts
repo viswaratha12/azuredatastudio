@@ -123,6 +123,14 @@ export class DeployPlanPage extends DacFxConfigPage {
 				label: loc.proceedDataLossMessage,
 			}).component();
 
+		this.dataLossCheckbox.onChanged(() => {
+			//Dataloss checkbox status
+			TelemetryReporter.createActionEvent(TelemetryViews.DeployPlanPage, 'DataTierApplicationDataLossCheckBoxOnChange')
+				.withAdditionalProperties({
+					'dataLossCheckbox': this.dataLossCheckbox.checked.toString()
+				}).send();
+		});
+
 		return {
 			component: this.dataLossCheckbox,
 			title: '',
