@@ -17,7 +17,7 @@ import { DacFxDataModel } from './api/models';
 import { BasePage } from './api/basePage';
 import { TelemetryReporter, TelemetryViews } from '../telemetry';
 import * as mssql from '../../../mssql';
-import { convertMilliSecondsToMinutes } from '../utils';
+import * as utils from '../utils';
 
 const msSqlProvider = 'MSSQL';
 class Page {
@@ -274,39 +274,78 @@ export class DataTierApplicationWizard {
 	}
 
 	public async deploy(): Promise<mssql.DacFxResult> {
+		const deployStartTime = new Date().getTime();
 		const service = await this.getService(msSqlProvider);
 		const ownerUri = await azdata.connection.getUriForConnection(this.model.server.connectionId);
 
+		let result = await service.deployDacpac(this.model.filePath, this.model.database, this.model.upgradeExisting, ownerUri, azdata.TaskExecutionMode.execute);
+
 		// Deploy Dacpac: 'Deploy button' clicked in deploy summary page, Reporting the event selection to the telemetry
-		TelemetryReporter.sendActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationDeployDacpacClicked');
-		return await service.deployDacpac(this.model.filePath, this.model.database, this.model.upgradeExisting, ownerUri, azdata.TaskExecutionMode.execute);
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationDeployDacpacOperation')
+			.withAdditionalProperties({
+				'deploymentStatus': result.success.toString(),
+				'error': result.errorMessage,
+				'totalDuration': utils.convertMilliSecondsToMinutes(new Date().getTime() - deployStartTime)
+			});
+
+		return result;
 	}
 
 	private async extract(): Promise<mssql.DacFxResult> {
+		const extractStartTime = new Date().getTime();
 		const service = await this.getService(msSqlProvider);
 		const ownerUri = await azdata.connection.getUriForConnection(this.model.server.connectionId);
 
+		let result = await service.extractDacpac(this.model.database, this.model.filePath, this.model.database, this.model.version, ownerUri, azdata.TaskExecutionMode.execute);
+
 		// Extract Dacpac: 'Extract button' clicked in extract summary page, Reporting the event selection to the telemetry
-		TelemetryReporter.sendActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationExtractDacpacClicked');
-		return await service.extractDacpac(this.model.database, this.model.filePath, this.model.database, this.model.version, ownerUri, azdata.TaskExecutionMode.execute);
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationExtractDacpacOperation')
+			.withAdditionalProperties({
+				'extractedFileSize': await utils.getFileSize(this.model.filePath),
+				'extractStatus': result.success.toString(),
+				'error': result.errorMessage,
+				'totalDuration': utils.convertMilliSecondsToMinutes(new Date().getTime() - extractStartTime)
+			});
+
+		return result;
 	}
 
 	private async export(): Promise<mssql.DacFxResult> {
+		const exportStartTime = new Date().getTime();
 		const service = await this.getService(msSqlProvider);
 		const ownerUri = await azdata.connection.getUriForConnection(this.model.server.connectionId);
 
+		let result = await service.exportBacpac(this.model.database, this.model.filePath, ownerUri, azdata.TaskExecutionMode.execute);
+
 		// Export Bacpac: 'Export button' clicked in Export summary page, Reporting the event selection to the telemetry
-		TelemetryReporter.sendActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationExportBacpacClicked');
-		return await service.exportBacpac(this.model.database, this.model.filePath, ownerUri, azdata.TaskExecutionMode.execute);
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationExportBacpacOperation')
+			.withAdditionalProperties({
+				'exportedFileSize': await utils.getFileSize(this.model.filePath),
+				'exportStatus': result.success.toString(),
+				'error': result.errorMessage,
+				'totalDuration': utils.convertMilliSecondsToMinutes(new Date().getTime() - exportStartTime)
+			});
+
+		return result;
 	}
 
 	private async import(): Promise<mssql.DacFxResult> {
+		const importStartTime = new Date().getTime();
 		const service = await this.getService(msSqlProvider);
 		const ownerUri = await azdata.connection.getUriForConnection(this.model.server.connectionId);
 
+		let result = await service.importBacpac(this.model.filePath, this.model.database, ownerUri, azdata.TaskExecutionMode.execute);
+
 		// Import Bacpac: 'Import button' clicked in Import summary page, Reporting the event selection to the telemetry
-		TelemetryReporter.sendActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationImportBacpacClicked');
-		return await service.importBacpac(this.model.filePath, this.model.database, ownerUri, azdata.TaskExecutionMode.execute);
+		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationImportBacpacOperation')
+			.withAdditionalProperties({
+				'importedFileSize': await utils.getFileSize(this.model.filePath),
+				'importStatus': result.success.toString(),
+				'error': result.errorMessage,
+				'totalDuration': utils.convertMilliSecondsToMinutes(new Date().getTime() - importStartTime)
+			});
+
+		return result;
 	}
 
 	private async generateDeployScript(): Promise<mssql.DacFxResult> {
@@ -324,10 +363,10 @@ export class DataTierApplicationWizard {
 		// Deploy Dacpac 'generate script' button clicked in DeployPlanPage, Reporting the event selection to the telemetry with fail/sucess status
 		TelemetryReporter.createActionEvent(TelemetryViews.DataTierApplicationWizard, 'DataTierApplicationGenerateDeployScriptClicked')
 			.withAdditionalProperties({
+				'targetDatabaseStatus': this.model.upgradeExisting ? 'Upgrade Existing Databse' : 'New Database',
 				'scriptGenerated': result.success.toString(),
 				'errorMessage': result.errorMessage,
-				'totalDuration': convertMilliSecondsToMinutes(new Date().getTime() - genScriptStartTime),
-				'targetDatabaseStatus': this.model.upgradeExisting ? 'Upgrade Existing Databse' : 'New Database'
+				'totalDuration': utils.convertMilliSecondsToMinutes(new Date().getTime() - genScriptStartTime)
 			}).send();
 
 		return result;
@@ -387,7 +426,7 @@ export class DataTierApplicationWizard {
 			.withAdditionalProperties({
 				'planGenerated': result.success.toString(),
 				'errorMessage': result.errorMessage,
-				'totalDuration': convertMilliSecondsToMinutes(new Date().getTime() - deployPlanStartTime),
+				'totalDuration': utils.convertMilliSecondsToMinutes(new Date().getTime() - deployPlanStartTime)
 			}).send();
 
 		return result.report;

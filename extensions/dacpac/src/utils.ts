@@ -3,6 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as fs from 'fs';
 export interface IPackageInfo {
 	name: string;
 	version: string;
@@ -44,4 +45,28 @@ export function convertMilliSecondsToMinutes(ms: number): string {
 
 	//return value is in ##min ##sec
 	return min + 'min ' + (sec < 10 ? '0' : '') + sec + 'sec';
+}
+
+/**
+ * Get file size from the file stats using the file path uri
+ * @param uri The file path
+ */
+export async function getFileSize(uri: string): Promise<string | undefined> {
+	const stats = await getFileStatus(uri);
+	return stats ? stats.size.toString() + ' Bytes' : undefined;
+}
+
+async function getFileStatus(path: string): Promise<fs.Stats | undefined> {
+	try {
+		const stats = await fs.promises.stat(path);
+		return stats;
+	}
+	catch (e) {
+		if (e.code === 'ENOENT') {
+			return undefined;
+		}
+		else {
+			throw e;
+		}
+	}
 }

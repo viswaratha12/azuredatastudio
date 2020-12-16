@@ -11,6 +11,7 @@ import { DataTierApplicationWizard, DeployOperationPath, Operation, DeployNewOpe
 import { DacFxConfigPage } from '../api/dacFxConfigPage';
 import { generateDatabaseName } from '../api/utils';
 import { TelemetryReporter, TelemetryViews } from '../../telemetry';
+import * as utils from '../../utils';
 
 export class DeployConfigPage extends DacFxConfigPage {
 	private databaseDropdownComponent: azdata.FormComponent;
@@ -84,6 +85,12 @@ export class DeployConfigPage extends DacFxConfigPage {
 			let fileUri = fileUris[0];
 			this.fileTextBox.value = fileUri.fsPath;
 			this.model.filePath = fileUri.fsPath;
+
+			// Reporting dacpac file size on file selection
+			TelemetryReporter.createActionEvent(TelemetryViews.DeployConfigPage, 'DataTierApplicationDeployDacpacFileSize')
+				.withAdditionalProperties({
+					'fileSize': (await utils.getFileSize(fileUri.fsPath))
+				}).send();
 		});
 
 		this.fileTextBox.onTextChanged(async () => {
