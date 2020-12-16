@@ -8,7 +8,6 @@ import * as loc from '../../localizedConstants';
 import { DacFxDataModel } from '../api/models';
 import { DataTierApplicationWizard, Operation, DeployOperationPath, ExtractOperationPath, ImportOperationPath, ExportOperationPath, PageName } from '../dataTierApplicationWizard';
 import { BasePage } from '../api/basePage';
-import { TelemetryReporter, TelemetryViews } from '../../telemetry';
 
 export class SelectOperationPage extends BasePage {
 	private deployRadioButton: azdata.RadioButtonComponent;
@@ -41,8 +40,6 @@ export class SelectOperationPage extends BasePage {
 
 		this.deployRadioButton.focus();
 		this.instance.setDoneButton(Operation.deploy);
-		//sending telemtry data while dacpac wizard started and the current view page is "Step 1:Select an Operation"
-		TelemetryReporter.sendActionEvent(TelemetryViews.SelectOperationPage, 'DataTierApplicationWizardStarted');
 		return true;
 	}
 

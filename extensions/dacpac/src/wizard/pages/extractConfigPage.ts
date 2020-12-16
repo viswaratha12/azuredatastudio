@@ -9,7 +9,6 @@ import * as loc from '../../localizedConstants';
 import { DacFxDataModel } from '../api/models';
 import { DataTierApplicationWizard } from '../dataTierApplicationWizard';
 import { DacFxConfigPage } from '../api/dacFxConfigPage';
-import { TelemetryReporter, TelemetryViews } from '../../telemetry';
 
 export class ExtractConfigPage extends DacFxConfigPage {
 	private form: azdata.FormContainer;
@@ -45,9 +44,6 @@ export class ExtractConfigPage extends DacFxConfigPage {
 	async onPageEnter(): Promise<boolean> {
 		let r1 = await this.populateServerDropdown();
 		let r2 = await this.populateDatabaseDropdown();
-
-		//Reporting extract dacpac selection event to Telemetry
-		TelemetryReporter.sendActionEvent(TelemetryViews.ExtractConfigPage, 'DataTierApplicationWizardExtractDacpacSelected');
 
 		return r1 && r2;
 	}

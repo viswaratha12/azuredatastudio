@@ -10,7 +10,6 @@ import { DacFxDataModel } from '../api/models';
 import { DataTierApplicationWizard } from '../dataTierApplicationWizard';
 import { DacFxConfigPage } from '../api/dacFxConfigPage';
 import { generateDatabaseName } from '../api/utils';
-import { TelemetryReporter, TelemetryViews } from '../../telemetry';
 
 export class ImportConfigPage extends DacFxConfigPage {
 	private form: azdata.FormContainer;
@@ -37,9 +36,6 @@ export class ImportConfigPage extends DacFxConfigPage {
 				componentWidth: 400
 			}).component();
 		await this.view.initializeModel(this.form);
-
-		//Reporting import bacpac selection event to Telemetry
-		TelemetryReporter.sendActionEvent(TelemetryViews.ImportConfigPage, 'DataTierApplicationWizardImportBacpacSelected');
 
 		return true;
 	}

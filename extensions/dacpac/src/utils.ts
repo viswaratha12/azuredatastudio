@@ -33,3 +33,15 @@ export function getTelemetryErrorType(msg: string): string {
 		return 'Other';
 	}
 }
+
+/**
+ * Converts milliseconds to minutes and seconds in string format
+ * @param ms milliseconds to convert
+ */
+export function convertMilliSecondsToMinutes(ms: number): string {
+	let min = Math.floor(ms / 60000);
+	let sec = Math.floor((ms % 60000) / 1000);
+
+	//return value is in ##min ##sec
+	return min + 'min ' + (sec < 10 ? '0' : '') + sec + 'sec';
+}

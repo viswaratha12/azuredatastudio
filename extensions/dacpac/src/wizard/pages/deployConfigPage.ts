@@ -49,8 +49,6 @@ export class DeployConfigPage extends DacFxConfigPage {
 		this.form = this.formBuilder.component();
 		await this.view.initializeModel(this.form);
 
-		//Reporting DeployDacpac selection event to the telemetry report //TODO: can add additional properties of database and file details, Also add Operation unique ID at all places if possible
-		TelemetryReporter.sendActionEvent(TelemetryViews.DeployConfigPage, 'DataTierApplicationDeployDacpacSelected');
 		return true;
 	}
 
@@ -226,6 +224,9 @@ export class DeployConfigPage extends DacFxConfigPage {
 			let summaryPage = this.instance.pages.get(PageName.summary);
 			this.instance.wizard.addPage(deployPlanPage.wizardPage, DeployOperationPath.deployPlan);
 			this.instance.wizard.addPage(summaryPage.wizardPage, DeployOperationPath.summary);
+
+			// By default Upgrade existing database radio button is selected, placing telemetry inside the if condition means the radio button status has changed
+			TelemetryReporter.sendActionEvent(TelemetryViews.DeployConfigPage, 'DataTierApplicationUpgradeExistingDatabaseSelected');
 		}
 	}
 
@@ -245,6 +246,9 @@ export class DeployConfigPage extends DacFxConfigPage {
 			let summaryPage = this.instance.pages.get(PageName.summary);
 			this.instance.wizard.addPage(summaryPage.wizardPage, DeployNewOperationPath.summary);
 		}
+
+		// New database radio button selected
+		TelemetryReporter.sendActionEvent(TelemetryViews.DeployConfigPage, 'DataTierApplicationDeployOnNewDatabaseSelected');
 	}
 
 	/*
