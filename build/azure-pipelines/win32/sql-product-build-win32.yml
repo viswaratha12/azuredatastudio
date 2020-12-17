@@ -118,7 +118,7 @@ steps:
   #     . build/azure-pipelines/win32/exec.ps1
   #     $ErrorActionPreference = "Stop"
   #     exec { yarn electron x64 }
-  #     exec { .\scripts\test.bat --build --coverage --reporter mocha-junit-reporter --tfs "Unit Tests" }
+  #     exec { .\scripts\test.bat --build --coverage --tfs "Unit Tests" }
   #   displayName: Run unit tests (Electron)
   #   condition: and(succeeded(), eq(variables['RUN_TESTS'], 'true'))
 
@@ -138,6 +138,7 @@ steps:
   - powershell: |
       . build/azure-pipelines/win32/exec.ps1
       $ErrorActionPreference = "Stop"
+      exec { yarn electron x64 }
       exec { .\scripts\test-unstable.bat --build --tfs "Unstable Unit Tests"}
     continueOnError: true
     condition: and(succeeded(), eq(variables['RUN_UNSTABLE_TESTS'], 'true'))
